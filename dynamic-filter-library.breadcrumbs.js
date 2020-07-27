@@ -22,9 +22,10 @@
      * @param {string} query
      */
     createBreadCrumbs(query = $(this._fc.config.searchHidInput).val()) {
-        let newline = /\^/g;
-        let connectors = /([\&\|])/g;
-        let operands = /(%%|!%%|_%|!_%|%_|!%_|!_|>=|<=|=|!|>|<|_)/g;
+        let newline = /(?<!(?:$|[^\`])(?:\`\`)*?\`)\^/g;
+        let connectors = /(?<!(?:$|[^\`])(?:\`\`)*?\`)([\&\|])/g;
+        let operands = /(?<!(?:$|[^\`])(?:\`\`)*?\`)(%%|!%%|_%|!_%|%_|!%_|!_|>=|<=|=|!|>|<|_)/g;
+        let escapecharacters = /`(\1.)/g;
         let substituteOperandName = {
             "%%": "contains",
             "!%%": "doesn't contain",
@@ -48,13 +49,17 @@
             let filters = lines[line].split(connectors); //[filter0, connector1, filter1, ...]
             for (let f of filters) {
                 if (connectors.test(f))
-                    fstring = fstring + (f == "|" ? " or " : " and ");
+                    fstring = fstring + (f.contains("|") ? " or " : " and ");
                 else if (f.length) {
                     let filter = f.split(operands); //[col, operand, value]
+                    if (escapecharacters.test(filter[2]))
+                        filter[2] = filter[2].replace(escapecharacters, '$1');
                     fstring = fstring + this._fc.config.columns(filter[0]).text + " " + ((filter[1] in substituteOperandName) ? substituteOperandName[filter[1]] : filter[1]) + (filter[2].length ? " '" + filter[2] + "'" : "");
                 }
             }
-            $(this._fc.config.breadcrumbs).append($("<li><a class='" + ((line == (lines.length - 1)) ? "active" : "") + "' data-query='" + query.substring(0, cindices[line]) + "'>" + fstring + "</a></li>"));
+            let el = $("<a class='" + ((line == (lines.length - 1)) ? "active" : "") + "'>" + fstring + "</a>");
+            el.attr('data-query', query.substring(0, cindices[line]));
+            $(this._fc.config.breadcrumbs).append($("<li></li>").append(el));
         }
 
         $(this._fc.config.breadcrumbs).on('click', 'li > a', function (e) {

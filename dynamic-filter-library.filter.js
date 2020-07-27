@@ -425,12 +425,16 @@
 
     /**
      * @description Converts the repeatable template items to filter query string
+     * Use /(?<!($|[^\\])(\\\\)*?\\)([\^\&\|])|(%%|!%%|_%|!_%|%_|!%_|!_|>=|<=|=|!|>|<|_)/g regex to split the query string
      */
      convertRepeatableTItemsToString() {
         let repeatable_items = $(this._config.repeatableArea).children('.repeatable-item');
+        let metacharacters = /(\^|\&|\||=|!|>|<|_|\`)/g;
         let query = "";
         for (let i = 0; i < repeatable_items.length; i++) {
             let val = $(repeatable_items[i]).children(this._config.searchInput).val();
+            if (metacharacters.test(val))
+                val = val.replace(metacharacters, '`$&'); //bug in mozilla which doesn't make '\\' work replacing it with '`'
             if (isNullOrUndefined(val) || val == "") {
                 let c = $(repeatable_items[i]).children(this._config.queryOperand).val();
                 if (c != "_" && c != "!_") continue;
@@ -445,8 +449,9 @@
      * @param {string} query - Query string
      */
      convertStringToRepeatableTItems(query) {
-        let connectors = /([\^\&\|])/g;
-        let operands = /(%%|!%%|_%|!_%|%_|!%_|!_|>=|<=|=|!|>|<|_)/g;
+        let connectors = /(?<!(?:$|[^\`])(?:\`\`)*?\`)([\^\&\|])/g;
+        let operands = /(?<!(?:$|[^\`])(?:\`\`)*?\`)(%%|!%%|_%|!_%|%_|!%_|!_|>=|<=|=|!|>|<|_)/g;
+        let escapecharacters = /`(\1.)/g;
         let lines = query.split(connectors); //[""; this._config.connector1, filter1, ...]
         var item;
         for (let line of lines) {
@@ -457,6 +462,8 @@
             }
             else if (line.length > 0) {
                 let filter = line.split(operands); //[column, operand, value]
+                if (escapecharacters.test(filter[2]))
+                    filter[2] = filter[2].replace(escapecharacters, '$1');
                 let el = item.find(this._config.searchColSelect).first();
                 this.getColFilterOptions(el, this._config.columns());
                 el.val(filter[0]);
