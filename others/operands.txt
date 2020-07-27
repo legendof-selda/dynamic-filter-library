@@ -1,0 +1,29 @@
+"=": "Equals"
+"!": "Not Equal"
+"%%": "Contains"
+"!%%": "Doesn't Contain"
+"_%": "Begins with"
+"!_%": "Doesn't Begin with"
+"%_": "Ends with"
+"!%_": "Doesn't End with"
+"_": "Empty"
+"!_": "Not Empty"
+">": "Greater than"
+"<": "Less than"
+">=": "Greater than equal to"
+"<=": "Less than equal to"
+
+"=":
+"!":
+"%%":
+"!%%":
+"_%":
+"!_%":
+"%_":
+"!%_":
+"_":
+"!_":
+">":
+"<":
+">=":
+"<=":
