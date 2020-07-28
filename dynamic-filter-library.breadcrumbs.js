@@ -49,7 +49,7 @@
             let filters = lines[line].split(connectors); //[filter0, connector1, filter1, ...]
             for (let f of filters) {
                 if (connectors.test(f))
-                    fstring = fstring + (f.contains("|") ? " or " : " and ");
+                    fstring = fstring + (f.includes("|") ? " or " : " and ");
                 else if (f.length) {
                     let filter = f.split(operands); //[col, operand, value]
                     if (escapecharacters.test(filter[2]))
