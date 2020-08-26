@@ -339,6 +339,13 @@ The sort query constitutes of the _order type_ and the _column_ separated by `~`
       var sc = new SortControl(config);
       //script body
       initializeDynamicFilterLibrary(fc, sc, bc);
+
+      function beforeSubmitFilters() {
+        //do something
+        fc.filterSubmit();
+        sc.sortSubmit();
+        //do something
+      }
     </script>
   </body>
 </html>
